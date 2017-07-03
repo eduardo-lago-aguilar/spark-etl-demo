@@ -16,7 +16,7 @@ object Incremental extends App {
 
   import spark.implicits._
 
-  //  benchmarks
+  benchmarks
 
   upserts
 
