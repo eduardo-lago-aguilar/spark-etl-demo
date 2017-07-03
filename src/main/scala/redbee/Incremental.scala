@@ -16,24 +16,40 @@ object Incremental extends App {
 
   import spark.implicits._
 
-  doit("data/people_1K.csv")
-  doit("data/people_4K.csv")
-  doit("data/people_8K.csv")
-  doit("data/people_16K.csv")
-  doit("data/people_32K.csv")
-  doit("data/people_128K.csv")
-  doit("data/people_256K.csv")
+  doit("data/people_1K.csv") // warmup?
+
+  benchmark {
+    doit("data/people_1K.csv")
+  }
+  benchmark {
+    doit("data/people_4K.csv")
+  }
+  benchmark {
+    doit("data/people_8K.csv")
+  }
+  benchmark {
+    doit("data/people_16K.csv")
+  }
+  benchmark {
+    doit("data/people_32K.csv")
+  }
+  benchmark {
+    doit("data/people_128K.csv")
+  }
+  benchmark {
+    doit("data/people_256K.csv")
+  }
 
   spark.stop()
 
-  def doit(csvFile: String)  = {
+  def doit(csvFile: String) = {
 
     // read and cache incremental CSV
     val csv: RDD[(String, Person)] = fromCsv(csvFile)
 
     // make a dynamic view from CSV ids
     // (SELECT * FROM person WHERE id IN ('1', '2', ..., '10000')) some_alias
-    val view = view(csv, "person", "id")
+    val view = makeView(csv, "person", "id")
 
     // read from postgresql using the dynamic view
     val pg: RDD[(String, Person)] = fromPg(view)
@@ -44,7 +60,7 @@ object Incremental extends App {
     // perform cleanup on RDD
     val clean: RDD[(String, Person)] = cleanup(join)
 
-    println(s"Finished processing of ${csvFile}, with ${clean.count()} cleaned rows!")
+    print(s"Finished processing of ${csvFile}, with ${clean.count()} cleaned rows")
   }
 
   def fromCsv(csv: String): RDD[(String, Person)] = {
@@ -71,7 +87,7 @@ object Incremental extends App {
       .rdd
   }
 
-  def view(people: RDD[(String, Person)], table: String, keyField: String): String = {
+  def makeView(people: RDD[(String, Person)], table: String, keyField: String): String = {
     val values = people.map { case (id, _) => s"'${id}'" }.reduce((total, current) => s"${total}, ${current}")
     val query = s"select * from ${table} where ${keyField} in (${values}"
     s"(${query})) some_alias_for_${table}"
@@ -79,5 +95,14 @@ object Incremental extends App {
 
   // TODO: silly implementation just to show up!
   def cleanup(join: RDD[(String, (Person, Option[Person]))]): RDD[(String, Person)] = join.mapValues { case (p0, _) => p0 }
+
+  def benchmark[R](block: => R): R = {
+    val t0 = System.nanoTime()
+    val result = block
+    val t1 = System.nanoTime()
+    println(" elapsed time: " + (t1 - t0) / 1000 / 1000 / 1000.0 + "s")
+    result
+  }
+
 
 }

@@ -22,7 +22,35 @@ All experiments were executed in:
 * SSD
 
 ### Experiment 1: 10 partitions x 1 Million rows in Pg
-- CSV 1K = 8s
-- CSV 16K = 8s
-- CSV 128K = 16s
-- CSV 256K = 29s
+| # of rows in CSV  | Time (s)  |
+| ----------:|:---------:|
+| 1K        | 1.3       |
+| 4K        | 1.9       |
+| 8K        | 1.9       |
+| 16K       | 1.9       |
+| 32K       | 3.3       |
+| 128K      | 8.7       |
+| 256K      | 26.5      |
+
+### Experiment 2: 10 partitions x 8 Million rows in Pg
+| # of rows in CSV  | Time (s)  |
+| ----------:|:---------:|
+| 1K        | 1.3       |
+| 4K        | 1.6       |
+| 8K        | 1.9       |
+| 16K       | 1.8       |
+| 32K       | 3.6       |
+| 128K      | 9.0       |
+| 256K      | 25.7      |
+
+### Experiment 3: 10 partitions x 16 Million rows in Pg
+| # of rows in CSV  | Time (s)  |
+| ----------:|:---------:|
+| 1K        | 1.3       |
+| 4K        | 1.6       |
+| 8K        | 1.9       |
+| 16K       | 1.9       |
+| 32K       | 3.5       |
+| 128K      | 9.3       |
+| 256K      | 25.7      |
+
