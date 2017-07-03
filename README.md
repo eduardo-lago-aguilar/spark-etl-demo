@@ -15,7 +15,19 @@ Pretty simple, instead of performing a sequence of lookups to PostgreSQL, a sing
 During reading the RDD corresponding to CSV is (hash) partitioned and cached, since it is used twice, first time for creating the query, and a second one for joining data.
 
 ## Populate PostgreSQL database
-The target database has a single table called `person`
+
+Create the databse:
+```
+CREATE DATABASE people
+  WITH OWNER = people
+       ENCODING = 'UTF8'
+       TABLESPACE = pg_default
+       LC_COLLATE = 'en_US.UTF-8'
+       LC_CTYPE = 'en_US.UTF-8'
+       CONNECTION LIMIT = -1;
+```
+
+The `people` database has a single table called `person`
 
 ```SQL
 CREATE TABLE person
@@ -39,6 +51,21 @@ Use the script `dupcsv.sh` to duplicate CSV until it reaches the desired size, f
 then import `data/people_512K.csv` into PostgreSQL `person` table.
 
 **Note**: during duplication of CSV keys are generated again, ranging from 1 to the number of rows.
+
+## Settings
+In `application.conf` change the settings:
+```
+jdbc {
+  user = ""
+  password = ""
+  host = "localhost"
+  port = "5432"
+  database = "people"
+}
+
+// num of spark partitions
+num_partitions = 10
+```
 
 ## Hardware
 All experiments were executed in:
