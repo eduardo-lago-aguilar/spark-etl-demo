@@ -16,7 +16,8 @@ object Incremental extends App {
 
   import spark.implicits._
 
-  doit("data/people_1K.csv") // warmup?
+  // warmup: looks like some previous warmup improves performance of subsequent benchmarks!
+  doit("data/people_1K.csv")
 
   benchmark {
     doit("data/people_1K.csv")
