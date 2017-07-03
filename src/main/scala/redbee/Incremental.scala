@@ -16,29 +16,44 @@ object Incremental extends App {
 
   import spark.implicits._
 
-  // warmup: looks like some previous warmup improves performance of subsequent benchmarks!
-  doit("data/people_1K.csv")
+  //  benchmarks
 
-  benchmark {
+  upserts
+
+  def upserts = {
+    val joined: RDD[(String, (Person, Option[Person]))] = doit("data/people_1K.csv")
+
+    joined.foreach {
+      case (id, (p0, Some(p1))) => println(s"update ${id} with ${p0} and ${p1}")
+      case (id, (p0, None)) => println(s"insert ${id} with ${p0}")
+    }
+  }
+
+  def benchmarks = {
+    // warmup: looks like some previous warmup improves performance of subsequent benchmarks!
     doit("data/people_1K.csv")
-  }
-  benchmark {
-    doit("data/people_4K.csv")
-  }
-  benchmark {
-    doit("data/people_8K.csv")
-  }
-  benchmark {
-    doit("data/people_16K.csv")
-  }
-  benchmark {
-    doit("data/people_32K.csv")
-  }
-  benchmark {
-    doit("data/people_128K.csv")
-  }
-  benchmark {
-    doit("data/people_256K.csv")
+
+    benchmark {
+      doit("data/people_1K.csv")
+    }
+    benchmark {
+      doit("data/people_4K.csv")
+    }
+    benchmark {
+      doit("data/people_8K.csv")
+    }
+    benchmark {
+      doit("data/people_16K.csv")
+    }
+    benchmark {
+      doit("data/people_32K.csv")
+    }
+    benchmark {
+      doit("data/people_128K.csv")
+    }
+    benchmark {
+      doit("data/people_256K.csv")
+    }
   }
 
   spark.stop()
@@ -62,6 +77,8 @@ object Incremental extends App {
     val clean: RDD[(String, Person)] = cleanup(join)
 
     print(s"Finished processing of ${csvFile}, with ${clean.count()} cleaned rows")
+
+    join
   }
 
   def fromCsv(csv: String): RDD[(String, Person)] = {
