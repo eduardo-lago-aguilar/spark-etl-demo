@@ -1,8 +1,8 @@
 # Spark ETL Demo
 
 There are two sources of data on this demo:
-1. CSV archives, ranging from 1 thousand upto 1 million rows
-2. PostgreSQL table preloaded with 1 million or 10 millions rows depending on the scenario
+1. CSV archives, ranging from 1 up to 256 thousand rows
+2. PostgreSQL table preloaded with 1 million or 8 millions or 16 millions rows depending on the experiment
 
 A CSV archive represents daily/hourly increments to be joined with corresponding rows in PostgreSQL table, cleaned, and inserted/updated back to PostgreSQL again. However since the goal is to make the join effective, no cleanup neither insertion back to PostgreSQL is covered here.
 
@@ -13,6 +13,32 @@ Pretty simple, instead of performing a sequence of lookups to PostgreSQL, a sing
 `SELECT * FROM person WHERE id IN ('1', '2', ...)`
 
 During reading the RDD corresponding to CSV is (hash) partitioned and cached, since it is used twice, first time for creating the query, and a second one for joining data.
+
+## Populate PostgreSQL database
+The target database has a single table called `person`
+
+```SQL
+CREATE TABLE person
+(
+  id character varying NOT NULL,
+  first_name character varying,
+  last_name character varying,
+  email character varying,
+  gender character varying,
+  CONSTRAINT person_pkey PRIMARY KEY (id)
+)
+WITH (
+  OIDS=FALSE
+);
+```
+
+Use the script `dupcsv.sh` to duplicate CSV until it reaches the desired size, for instance:
+
+`$ ./dupcsv.sh data/people_256K.csv data/people_512K.csv`
+
+then import `data/people_512K.csv` into PostgreSQL `person` table.
+
+**Note**: during duplication of CSV keys are generated again, ranging from 1 to the number of rows.
 
 ## Hardware
 All experiments were executed in:
