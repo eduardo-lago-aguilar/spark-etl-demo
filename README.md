@@ -107,3 +107,14 @@ All experiments were executed in:
 | 128K      | 9.3       |
 | 256K      | 30.7      |
 
+### Experiment 3: No partitions x 16 Million rows in Pg
+| # of rows in CSV  | Time (s)  |
+| ----------:|:---------:|
+| 1K        | 0.8       |
+| 4K        | 1.0       |
+| 8K        | 1.3       |
+| 16K       | 2.0       |
+| 32K       | 4.8       |
+| 128K      | 35.1       |
+| 256K      | 105.5      |
+
