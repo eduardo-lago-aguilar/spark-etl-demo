@@ -18,7 +18,7 @@ object Incremental extends App {
 
   benchmarks
 
-  upserts
+//  upserts
 
   def upserts = {
     val joined: RDD[(String, (Person, Option[Person]))] = doit("data/people_1K.csv")
