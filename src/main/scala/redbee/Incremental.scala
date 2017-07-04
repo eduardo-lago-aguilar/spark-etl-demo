@@ -21,7 +21,7 @@ object Incremental extends App {
 //  upserts
 
   def upserts = {
-    val joined: RDD[(String, (Person, Option[Person]))] = doit("data/people_1K.csv")
+    val joined: RDD[(String, (Person, Option[Person]))] = doJoin("data/people_1K.csv")
 
     joined.foreach {
       case (id, (p0, Some(p1))) => println(s"update ${id} with ${p0} and ${p1}")
@@ -31,34 +31,34 @@ object Incremental extends App {
 
   def benchmarks = {
     // warmup: looks like some previous warmup improves performance of subsequent benchmarks!
-    doit("data/people_1K.csv")
+    doJoin("data/people_1K.csv")
 
     benchmark {
-      doit("data/people_1K.csv")
+      doJoin("data/people_1K.csv")
     }
     benchmark {
-      doit("data/people_4K.csv")
+      doJoin("data/people_4K.csv")
     }
     benchmark {
-      doit("data/people_8K.csv")
+      doJoin("data/people_8K.csv")
     }
     benchmark {
-      doit("data/people_16K.csv")
+      doJoin("data/people_16K.csv")
     }
     benchmark {
-      doit("data/people_32K.csv")
+      doJoin("data/people_32K.csv")
     }
     benchmark {
-      doit("data/people_128K.csv")
+      doJoin("data/people_128K.csv")
     }
     benchmark {
-      doit("data/people_256K.csv")
+      doJoin("data/people_256K.csv")
     }
   }
 
   spark.stop()
 
-  def doit(csvFile: String) = {
+  def doJoin(csvFile: String) = {
 
     // read and cache incremental CSV
     val csv: RDD[(String, Person)] = fromCsv(csvFile)
@@ -73,10 +73,7 @@ object Incremental extends App {
     // perform join
     val join: RDD[(String, (Person, Option[Person]))] = csv.leftOuterJoin(pg)
 
-    // perform cleanup on RDD
-    val clean: RDD[(String, Person)] = cleanup(join)
-
-    print(s"Finished processing of ${csvFile}, with ${clean.count()} cleaned rows")
+    print(s"Finished processing of ${csvFile}, with ${join.count()} joined rows")
 
     join
   }
@@ -110,9 +107,6 @@ object Incremental extends App {
     val query = s"select * from ${table} where ${keyField} in (${values}"
     s"(${query})) some_alias_for_${table}"
   }
-
-  // TODO: silly implementation just to show up!
-  def cleanup(join: RDD[(String, (Person, Option[Person]))]): RDD[(String, Person)] = join.mapValues { case (p0, _) => p0 }
 
   def benchmark[R](block: => R): R = {
     val t0 = System.nanoTime()

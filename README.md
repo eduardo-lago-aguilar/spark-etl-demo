@@ -105,5 +105,5 @@ All experiments were executed in:
 | 16K       | 1.9       |
 | 32K       | 3.5       |
 | 128K      | 9.3       |
-| 256K      | 25.7      |
+| 256K      | 30.7      |
 
