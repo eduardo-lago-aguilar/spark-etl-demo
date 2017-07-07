@@ -96,6 +96,7 @@ object Incremental extends App {
     connectionProps.put("password", password)
 
     spark.read
+      .option("driver", "org.postgresql.Driver")
       .jdbc(url = jdbcUrl, table = query, properties = connectionProps)
       .as[Person]
       .map(p => p.id -> p)
