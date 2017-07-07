@@ -18,7 +18,7 @@ object Incremental extends App {
 
   benchmarks
 
-//  upserts
+  //  upserts
 
   def upserts = {
     val joined: RDD[(String, (Person, Option[Person]))] = doJoin("data/people_1K.csv")
@@ -90,14 +90,13 @@ object Incremental extends App {
   }
 
   def fromPg(query: String): RDD[(String, Person)] = {
-    val jdbcUrl = s"jdbc:postgresql://${host}:${port}/${database}"
-    val connectionProps: Properties = new Properties()
-    connectionProps.put("user", user)
-    connectionProps.put("password", password)
-
+    val jdbcUrl = s"jdbc:postgresql://${host}:${port}"
     spark.read
       .option("driver", "org.postgresql.Driver")
-      .jdbc(url = jdbcUrl, table = query, properties = connectionProps)
+      .option("user", user)
+      .option("password", password)
+      .option("database", database)
+      .jdbc(url = jdbcUrl, table = query, properties = new Properties)
       .as[Person]
       .map(p => p.id -> p)
       .rdd
